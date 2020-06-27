@@ -1,8 +1,11 @@
 package it.polito.tdp.extflightdelays;
 
 import java.net.URL;
+import java.util.List;
+import java.util.Map;
 import java.util.ResourceBundle;
 
+import it.polito.tdp.extflightdelays.model.Adiacenza;
 import it.polito.tdp.extflightdelays.model.Model;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -28,7 +31,7 @@ public class FXMLController {
     private Button btnCreaGrafo;
 
     @FXML
-    private ComboBox<?> cmbBoxStati;
+    private ComboBox<String> cmbBoxStati;
 
     @FXML
     private Button btnVisualizzaVelivoli;
@@ -41,20 +44,56 @@ public class FXMLController {
 
     @FXML
     private Button btnSimula;
+    
+    String stato;
 
     @FXML
     void doCreaGrafo(ActionEvent event) {
-
+    	
+    	this.txtResult.clear();
+    	List<String> stati = this.model.creaGrafo();
+    	this.cmbBoxStati.getItems().addAll(stati);
+    	this.txtResult.appendText("Grafo creato con "+this.model.getVertexSetSize()+" vertici e "+this.model.getEdgeSetSize()+" archi.\n\n");
     }
 
     @FXML
     void doSimula(ActionEvent event) {
-
+    	Integer i;
+    	try {
+    		i = Integer.parseInt(this.txtT.getText());
+    	} catch (NumberFormatException e) {
+    		this.txtResult.appendText("Inserire intero valido.");
+    		return;
+    	}
+    	Integer j;
+    	try {
+    		j = Integer.parseInt(this.txtG.getText());
+    	} catch (NumberFormatException e) {
+    		this.txtResult.appendText("Inserire intero valido.");
+    		return;
+    	}
+    	stato = this.cmbBoxStati.getValue();
+    	if(stato == null) {
+    		this.txtResult.appendText("Selezionare uno stato!");
+    		return;
+    	}
+    	Map<String, Integer> statiPersone = this.model.simula(i, j, this.stato);
+    	for(String s: statiPersone.keySet()) {
+    		this.txtResult.appendText("Stato: "+s+" numero persone: "+statiPersone.get(s)+"\n");
+    	}
     }
 
     @FXML
     void doVisualizzaVelivoli(ActionEvent event) {
-
+    	stato = this.cmbBoxStati.getValue();
+    	if(stato == null) {
+    		this.txtResult.appendText("Selezionare uno stato!");
+    		return;
+    	}
+    	List<Adiacenza> result = this.model.getVelivoli(stato);
+    	for(Adiacenza a: result) {
+    		this.txtResult.appendText(a.toString()+"\n");
+    	}
     }
 
     @FXML
